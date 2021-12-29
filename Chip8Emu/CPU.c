@@ -23,6 +23,15 @@ void CPUInit()
 	IndexRegister = 0;
 }
 
+void CPUTimerTick()
+{
+	if (DelayRegister > 0)
+		DelayRegister--;
+
+	if (SoundTimerRegister > 0)
+		SoundTimerRegister--;
+}
+
 uint8_t RandVal = 0x80;
 
 uint8_t Rand()
@@ -112,7 +121,7 @@ void ExecuteOpcode()
 	}
 	case (0x8000):
 	{
-		switch (OpCode & 0x000F)
+		switch (N)
 		{
 		case (0):
 		{
@@ -252,7 +261,7 @@ void ExecuteOpcode()
 	}
 	case (0xE000):
 	{
-		switch (OpCode & 0x00FF)
+		switch (VAL)
 		{
 		case (0x9E):
 		{
@@ -280,7 +289,9 @@ void ExecuteOpcode()
 	}
 	case (0xF000):
 	{
-		switch (OpCode & 0x00FF)
+		printf("Opcode F; VAL %x\n", VAL);
+		
+		switch (VAL)
 		{
 		case (0x07):
 		{
@@ -368,9 +379,12 @@ void ExecuteOpcode()
 			break;
 		}
 		default:
+		{
 			OP_NOP(OpCode);
 			break;
 		}
+		}
+		break;
 	}
 	default:
 		OP_NOP(OpCode);

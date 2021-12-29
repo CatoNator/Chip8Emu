@@ -148,8 +148,14 @@ void BackendPollInput()
 
 void BackendRun()
 {
+	uint32_t Ticks = SDL_GetTicks();
+	uint32_t PrevTicks = Ticks;
+	uint32_t TickDelta = 0;
+
 	while (Running)
 	{
+		
+		
 		//Poll input
 		BackendPollInput();
 
@@ -159,12 +165,16 @@ void BackendRun()
 		//Draw buffer to screen
 		BackendFinalDraw();
 
-		/*while (!FrameAdv)
-		{
-			BackendPollInput();
-		}
+		//DT and ST ticks at 60Hz
+		Ticks = SDL_GetTicks();
+		TickDelta = Ticks - PrevTicks;
 
-		FrameAdv = 0;*/
+		if (TickDelta > 1000.0f/(float)CPU_TICK_RATE)
+		{
+			PrevTicks = Ticks;
+
+			CPUTimerTick();
+		}
 	}
 }
 
