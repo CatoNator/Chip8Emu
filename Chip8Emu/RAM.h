@@ -3,6 +3,9 @@
 #define RAM_H
 
 #include <stdint.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
 #define RAM_SIZE (4096)
 #define STACK_SIZE (16)
@@ -12,14 +15,22 @@
 //0x4F-0x1FF is general VM memory
 #define PROGRAM_START (0x200)
 
-uint8_t* Heap = NULL;
+extern uint8_t* Heap;
+
+extern uint16_t Stack[STACK_SIZE];
+
+extern uint8_t ProgramCounter;
+extern uint16_t StackPointer;
 
 // ---- RAM MANAGEMENT SUBROUTINES ---- //
 
 extern void InitRAM();
 
-extern uint8_t ReadByte();
-extern uint16_t ReadShort();
+extern void PushStack(uint16_t Value);
+extern uint16_t PopStack();
+
+extern uint8_t ReadByte(uint16_t Address);
+extern uint16_t ReadShort(uint16_t Address);
 
 extern void CleanRAM();
 

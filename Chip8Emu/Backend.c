@@ -70,21 +70,51 @@ void BackendInit()
 	//Renderer default colour(black)
 	SDL_SetRenderDrawColor(gGameRenderer, 0x00, 0x00, 0x00, 0xFF);
 
+	//Configure emulator
+	InitRAM();
+
 	Running = 1;
+}
+
+void BackendPollInput()
+{
+	SDL_Event e;
+
+	while (SDL_PollEvent(&e) != 0)
+	{
+		//User requests quit
+		if (e.type == SDL_QUIT || (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE))
+		{
+			Running = 0;
+		}
+		//idk what to do with inputs yet here
+		else if (e.type == SDL_KEYDOWN)
+		{
+			//Temp keyboard polling
+		}
+		else if (e.type == SDL_KEYUP)
+		{
+				
+		}
+	}
 }
 
 void BackendRun()
 {
 	while (Running)
 	{
-		//timing?
+		//Poll input
+		BackendPollInput();
 
-		//cpu execute
+		//emulate CPU cycle
+		//ExecuteOpcode();
 
+		//Temp
 		ClearScreen();
 
 		DrawPixel(10, 10);
 
+		//Draw buffer to screen
 		BackendFinalDraw();
 	}
 }
@@ -151,6 +181,9 @@ void BackendFinalDraw()
 
 void BackendExit()
 {
+	//Close emulator systems
+	CleanRAM();
+	
 	//Close audio device
 	//SDL_CloseAudioDevice(AudioDevice);
 

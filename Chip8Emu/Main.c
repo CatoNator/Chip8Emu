@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include"Backend.h"
 
-int main()
+int main(int argc, char* args[])
 {
-    printf("Hello world!");
-
     BackendInit();
+
+    //Read rom from command line, load it
 
     BackendRun();
 
