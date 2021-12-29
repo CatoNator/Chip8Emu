@@ -9,6 +9,8 @@ with code and library includes specific for the device you're targeting.
 
 #include <SDL.h>
 
+uint8_t FrameAdv = 0;
+
 // ---- GRAPHICS DEFS AND VARS ---- //
 
 SDL_Window* gGameWindow = NULL;
@@ -73,7 +75,50 @@ void BackendInit()
 	//Configure emulator
 	InitRAM();
 
+	//Init screen
+	ClearScreen();
+
+	//Set CPU to initial state
+	CPUInit();
+
 	Running = 1;
+}
+
+uint8_t BackendLoadROM(const char* Path)
+{
+	FILE* RomFile = fopen(Path, "rb+");
+
+	if (RomFile == NULL)
+	{
+		printf("Failed to open file %s!\n", Path);
+		return 0;
+	}
+
+	if (Heap == NULL)
+	{
+		printf("RAM uninitialized!\n");
+		return 0;
+	}
+
+	//Seek to EOF
+	fseek(RomFile, 0L, SEEK_END);
+
+	//Get filesize
+	uint32_t FileSize = ftell(RomFile);
+
+	printf("Filesize %u\n", FileSize);
+
+	//Seek to BOF
+	fseek(RomFile, 0L, SEEK_SET);
+
+	//Copy ROM to mem
+	fread((void*)(Heap + PROGRAM_START), 1, FileSize, RomFile);
+
+	fclose(RomFile);
+
+	RomFile == NULL;
+	
+	return 1;
 }
 
 void BackendPollInput()
@@ -91,6 +136,8 @@ void BackendPollInput()
 		else if (e.type == SDL_KEYDOWN)
 		{
 			//Temp keyboard polling
+			if (e.key.keysym.sym == SDLK_SPACE)
+				FrameAdv = 1;
 		}
 		else if (e.type == SDL_KEYUP)
 		{
@@ -107,16 +154,44 @@ void BackendRun()
 		BackendPollInput();
 
 		//emulate CPU cycle
-		//ExecuteOpcode();
-
-		//Temp
-		ClearScreen();
-
-		DrawPixel(10, 10);
+		ExecuteOpcode();
 
 		//Draw buffer to screen
 		BackendFinalDraw();
+
+		/*while (!FrameAdv)
+		{
+			BackendPollInput();
+		}
+
+		FrameAdv = 0;*/
 	}
+}
+
+void BackendPanic(const char* Message)
+{
+	printf("Panic! %s\n", Message);
+
+	Running = 0;
+#ifdef _DEBUG
+
+	printf("---- BEGIN HEAP DUMP ----\n");
+
+	//Dump heap
+	for (int i = 0; i < RAM_SIZE; i++)
+	{
+		printf("%x ", Heap[i]);
+	}
+
+	printf("\n---- END HEAP DUMP ----\n");
+
+	/*FILE* Dump = fopen("Heap.bin", "wb+");
+
+	fwrite(Heap, 1, RAM_SIZE, Dump);
+
+	fclose(Dump);*/
+
+#endif // !_DEBUG
 }
 
 void BackendFinalDraw()

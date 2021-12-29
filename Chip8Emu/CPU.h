@@ -12,10 +12,14 @@ extern uint8_t Registers[REGISTER_COUNT];
 extern uint8_t DelayRegister;
 extern uint8_t SoundTimerRegister;
 
-extern uint16_t I;
+extern uint16_t IndexRegister;
+
+extern uint16_t InputBuffer;
+
+extern void CPUInit();
 
 extern void ExecuteOpcode();
 
-extern void OP_NOP();
+extern void OP_NOP(uint16_t OpCode);
 
 #endif

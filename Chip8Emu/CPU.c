@@ -1,15 +1,37 @@
 #include "CPU.h"
 #include "RAM.h"
 #include "Display.h"
+#include "Backend.h"
 
 uint8_t Registers[REGISTER_COUNT];
 
 uint8_t DelayRegister = 0;
 uint8_t SoundTimerRegister = 0;
 
-uint16_t IRegister = 0;
+uint16_t IndexRegister = 0;
 
-extern void ExecuteOpcode()
+uint16_t InputBuffer = 1;
+
+void CPUInit()
+{
+	memset(&Registers, 0, 2 * STACK_SIZE);
+
+	ProgramCounter = PROGRAM_START;
+
+	DelayRegister = 0;
+	SoundTimerRegister = 0;
+	IndexRegister = 0;
+}
+
+uint8_t RandVal = 0x80;
+
+uint8_t Rand()
+{
+	RandVal += RandVal ^ 0x38;
+	return RandVal;
+}
+
+void ExecuteOpcode()
 {
 	uint16_t OpCode = ReadShort(ProgramCounter);
 	ProgramCounter += 2;
@@ -33,7 +55,7 @@ extern void ExecuteOpcode()
 			ProgramCounter = PopStack();
 			break;
 		default: //SYS addr
-			OP_NOP();
+			OP_NOP(OpCode);
 			break;
 		}
 		break;
@@ -181,6 +203,9 @@ extern void ExecuteOpcode()
 
 			break;
 		}
+		default:
+			OP_NOP(OpCode);
+			break;
 		}
 		break;
 	}
@@ -197,7 +222,7 @@ extern void ExecuteOpcode()
 	{
 		//LD I, addr
 
-		IRegister = ADDR;
+		IndexRegister = ADDR;
 
 		break;
 	}
@@ -211,9 +236,17 @@ extern void ExecuteOpcode()
 	}
 	case (0xC000):
 	{
+		//RND Vx, byte
+
+		Registers[VX] = Rand() & VAL;
+
+		break;
+	}
+	case (0xD000):
+	{
 		//DRW Vx, Vy, n
 
-		DrawSprite(Registers[VX], Registers[VY], (uint8_t*)(Heap + IRegister), N);
+		DrawSprite(Registers[VX], Registers[VY], (uint8_t*)(Heap + IndexRegister), N);
 
 		break;
 	}
@@ -226,10 +259,8 @@ extern void ExecuteOpcode()
 			//SKP Vx
 			//to do
 
-			/*
-			if (IsKeyDown(Registers[VX])
+			if (InputBuffer & (Registers[VX] & 0x0F))
 				ProgramCounter += 2;
-			*/
 
 			break;
 		}
@@ -237,16 +268,13 @@ extern void ExecuteOpcode()
 		{
 			//SKNP Vx
 			//to do
-
-			/*
-			if (!IsKeyDown(Registers[VX])
+			if (!(InputBuffer & (Registers[VX] & 0x0F)))
 				ProgramCounter += 2;
-			*/
 
 			break;
 		}
 		default:
-			OP_NOP();
+			OP_NOP(OpCode);
 			break;
 		}
 	}
@@ -290,16 +318,16 @@ extern void ExecuteOpcode()
 		{
 			//ADD I, vx
 
-			IRegister += Registers[VX];
+			IndexRegister += Registers[VX];
 
 			break;
 		}
 		case (0x29):
 		{
 			//LD F, Vx
-			//to do
+			//Set IndexRegister to point to hexadecimal character of value in Vx
 
-			//Set I to location of character Vx in mem
+			IndexRegister = FONT_CHAR_SIZE * (Registers[VX] & 0x0F);
 
 			break;
 		}
@@ -309,15 +337,20 @@ extern void ExecuteOpcode()
 			//to do
 
 			//Take address from i, write decimal representation of Vx in I, I+1, I+2
+			Heap[IndexRegister] = (Registers[VX] % 1000) / 100;
+			Heap[IndexRegister + 1] = (Registers[VX] % 100) / 10;
+			Heap[IndexRegister + 2] = (Registers[VX] % 10);
 
 			break;
 		}
 		case (0x55):
 		{
 			//LD [I], Vx
-			//to do
-
-			//Write registers V0-Vx at location I 
+			
+			for (int i = 0; i <= VX; i++)
+			{
+				Heap[IndexRegister + i] = Registers[i];
+			}
 
 			break;
 		}
@@ -327,18 +360,53 @@ extern void ExecuteOpcode()
 			//to do
 
 			//Set registers V0-Vx to values from location I
+			for (int i = 0; i <= VX; i++)
+			{
+				Registers[i] = Heap[IndexRegister + i];
+			}
 
 			break;
 		}
 		default:
-			OP_NOP();
+			OP_NOP(OpCode);
 			break;
 		}
 	}
+	default:
+		OP_NOP(OpCode);
+		break;
 	}
+
+	printf("OP %x VX %u VY %u N %u VAL %u ADDR %u\n", OpCode, VX, VY, N, VAL, ADDR);
+
+
 }
 
-void OP_NOP()
+static void DumpRegisters()
 {
-	printf("Hit no-operation opcode\n");
+	printf("------------------------------------------------------------------\n");
+	printf("\n");
+
+	printf("V0: 0x%02x  V4: 0x%02x  V8: 0x%02x  VC: 0x%02x\n",
+		Registers[0], Registers[4], Registers[8], Registers[12]);
+	printf("V1: 0x%02x  V5: 0x%02x  V9: 0x%02x  VD: 0x%02x\n",
+		Registers[1], Registers[5], Registers[9], Registers[13]);
+	printf("V2: 0x%02x  V6: 0x%02x  VA: 0x%02x  VE: 0x%02x\n",
+		Registers[2], Registers[6], Registers[10], Registers[14]);
+	printf("V3: 0x%02x  V7: 0x%02x  VB: 0x%02x  VF: 0x%02x\n",
+		Registers[3], Registers[7], Registers[11], Registers[15]);
+
+	printf("\n");
+	printf("PC: 0x%04x\n", ProgramCounter);
+	printf("\n");
+	printf("\n");
+}
+
+void OP_NOP(uint16_t OpCode)
+{
+	printf("Hit no-operation opcode %x\n", OpCode);
+
+	DumpRegisters();
+
+	BackendPanic("Unknown opcode!");
 }

@@ -10,13 +10,13 @@ void ClearScreen()
 
 void DrawPixel(uint8_t X, uint8_t Y)
 {
-	DisplayBuffer[Y] |= (ZERO_PIX >> X);
+	DisplayBuffer[Y] ^= (ZERO_PIX >> X);
 }
 
 void DrawSprite(uint8_t X, uint8_t Y, uint8_t* SprBuf, uint8_t Size)
 {
 	for (int i = 0; i < Size; i++)
 	{
-		DisplayBuffer[Y + i] |= (SprBuf[i] >> X);
+		DisplayBuffer[Y + i] ^= (SprBuf[i] >> X);
 	}
 }

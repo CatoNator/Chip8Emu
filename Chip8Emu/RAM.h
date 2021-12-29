@@ -10,17 +10,21 @@
 #define RAM_SIZE (4096)
 #define STACK_SIZE (16)
 
+#define FONT_CHAR_SIZE (5)
+
 //0x00-0x4E contains hexadecimal font data
-#define VM_GENERAL_START (0x4F)
+#define VM_GENERAL_START (0x50)
 //0x4F-0x1FF is general VM memory
 #define PROGRAM_START (0x200)
+
+// ----  VARS ---- //
 
 extern uint8_t* Heap;
 
 extern uint16_t Stack[STACK_SIZE];
 
-extern uint8_t ProgramCounter;
-extern uint16_t StackPointer;
+extern uint16_t ProgramCounter;
+extern uint8_t StackPointer;
 
 // ---- RAM MANAGEMENT SUBROUTINES ---- //
 

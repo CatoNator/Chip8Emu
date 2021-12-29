@@ -10,7 +10,10 @@
 
 extern uint8_t Running;
 
+extern void BackendPanic(const char* Message);
+
 extern void BackendInit();
+extern uint8_t BackendLoadROM(const char* Path);
 extern void BackendRun();
 extern void BackendPollInput();
 extern void BackendFinalDraw();
