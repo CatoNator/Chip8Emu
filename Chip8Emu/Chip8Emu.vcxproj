@@ -151,6 +151,7 @@
     <ClCompile Include="Backend.c" />
     <ClCompile Include="CPU.c" />
     <ClCompile Include="Display.c" />
+    <ClCompile Include="Input.c" />
     <ClCompile Include="Main.c" />
     <ClCompile Include="RAM.c" />
   </ItemGroup>
@@ -158,6 +159,7 @@
     <ClInclude Include="Backend.h" />
     <ClInclude Include="CPU.h" />
     <ClInclude Include="Display.h" />
+    <ClInclude Include="Input.h" />
     <ClInclude Include="RAM.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

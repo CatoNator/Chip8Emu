@@ -17,6 +17,10 @@ void DrawSprite(uint8_t X, uint8_t Y, uint8_t* SprBuf, uint8_t Size)
 {
 	for (int i = 0; i < Size; i++)
 	{
-		DisplayBuffer[Y + i] ^= (SprBuf[i] >> X);
+		uint64_t Line = (uint64_t)SprBuf[i];
+
+		//I don't actually know why this is 53. By all accounts it should be 56 (64 - 8), but that doesn't work...
+		Line <<= 53;
+		DisplayBuffer[Y + i] ^= (Line >> X);
 	}
 }

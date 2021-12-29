@@ -43,7 +43,7 @@ void BackendInit()
 	}
 
 	//create a window
-	gGameWindow = SDL_CreateWindow("Test", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, gBackBufferWidth, gBackBufferHeight, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
+	gGameWindow = SDL_CreateWindow("CHIP-8 Emulator", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, gBackBufferWidth, gBackBufferHeight, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
 
 	if (gGameWindow == NULL)
 	{
@@ -116,7 +116,7 @@ uint8_t BackendLoadROM(const char* Path)
 
 	fclose(RomFile);
 
-	RomFile == NULL;
+	RomFile = NULL;
 	
 	return 1;
 }
@@ -161,6 +161,12 @@ void BackendRun()
 
 		//emulate CPU cycle
 		ExecuteOpcode();
+
+		/*ClearScreen();
+
+		DrawSprite(0, 0, &Heap[5 * 0xE], 5);
+
+		DrawPixel(33, 16);*/
 
 		//Draw buffer to screen
 		BackendFinalDraw();

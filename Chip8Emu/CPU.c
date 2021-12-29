@@ -2,6 +2,7 @@
 #include "RAM.h"
 #include "Display.h"
 #include "Backend.h"
+#include "Input.h"
 
 uint8_t Registers[REGISTER_COUNT];
 
@@ -9,8 +10,6 @@ uint8_t DelayRegister = 0;
 uint8_t SoundTimerRegister = 0;
 
 uint16_t IndexRegister = 0;
-
-uint16_t InputBuffer = 1;
 
 void CPUInit()
 {
@@ -36,7 +35,20 @@ uint8_t RandVal = 0x80;
 
 uint8_t Rand()
 {
-	RandVal += RandVal ^ 0x38;
+	uint8_t S0 = RandVal << 4;
+	S0 = S0 ^ RandVal;
+
+	RandVal = ((S0 & 0x0F) << 4) | ((S0 & 0xF0) >> 4);
+
+	S0 = ((RandVal & 0x0F) << 1) ^ RandVal;
+
+	uint8_t S1 = (S0 >> 1) ^ 0xF8;
+
+	if (S0 & 0x1 == 1)
+		RandVal = 0x37 ^ S1;
+	else
+		RandVal = 0x23 ^ S1;
+
 	return RandVal;
 }
 
@@ -46,7 +58,7 @@ void ExecuteOpcode()
 	ProgramCounter += 2;
 
 	uint8_t VX = (OpCode >> 8) & 0x000F; //Lower nibble of high byte
-	uint8_t VY = (OpCode >> 8) & 0x000F; //Upper nibble of low byte
+	uint8_t VY = (OpCode >> 4) & 0x000F; //Upper nibble of low byte
 	uint8_t N = OpCode & 0x000F; //Lowest nibble
 	uint8_t VAL = OpCode & 0x00FF; //Lower byte
 	uint16_t ADDR = OpCode & 0x0FFF; //Address is lowest 12 bits
@@ -160,7 +172,7 @@ void ExecuteOpcode()
 			if (Val > 0xFF)
 				Registers[0xF] = 1;
 
-			Registers[VX] = (uint8_t)(Val & 0x00FF);
+			Registers[VX] = (uint8_t)Val;
 
 			break;
 		}
@@ -268,7 +280,7 @@ void ExecuteOpcode()
 			//SKP Vx
 			//to do
 
-			if (InputBuffer & (Registers[VX] & 0x0F))
+			if (IsButtonDown(Registers[VX]))
 				ProgramCounter += 2;
 
 			break;
@@ -277,7 +289,7 @@ void ExecuteOpcode()
 		{
 			//SKNP Vx
 			//to do
-			if (!(InputBuffer & (Registers[VX] & 0x0F)))
+			if (!IsButtonDown(Registers[VX]))
 				ProgramCounter += 2;
 
 			break;
@@ -289,8 +301,6 @@ void ExecuteOpcode()
 	}
 	case (0xF000):
 	{
-		printf("Opcode F; VAL %x\n", VAL);
-		
 		switch (VAL)
 		{
 		case (0x07):
@@ -358,23 +368,26 @@ void ExecuteOpcode()
 		{
 			//LD [I], Vx
 			
-			for (int i = 0; i <= VX; i++)
+			/*for (int i = 0; i <= VX; i++)
 			{
 				Heap[IndexRegister + i] = Registers[i];
-			}
+			}*/
+
+			memcpy(&Heap[IndexRegister], &Registers, VX);
 
 			break;
 		}
 		case (0x65):
 		{
 			//LD Vx, [I]
-			//to do
 
 			//Set registers V0-Vx to values from location I
-			for (int i = 0; i <= VX; i++)
+			/*for (int i = 0; i <= VX; i++)
 			{
 				Registers[i] = Heap[IndexRegister + i];
-			}
+			}*/
+
+			memcpy(&Registers, &Heap[IndexRegister], VX);
 
 			break;
 		}

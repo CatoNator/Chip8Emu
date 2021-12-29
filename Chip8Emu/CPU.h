@@ -15,8 +15,6 @@ extern uint8_t SoundTimerRegister;
 
 extern uint16_t IndexRegister;
 
-extern uint16_t InputBuffer;
-
 extern void CPUInit();
 
 extern void CPUTimerTick();
