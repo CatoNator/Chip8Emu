@@ -298,6 +298,7 @@ void ExecuteOpcode()
 			OP_NOP(OpCode);
 			break;
 		}
+		break;
 	}
 	case (0xF000):
 	{

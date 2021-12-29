@@ -1,7 +1,7 @@
 # Chip8Emu
  a CHIP-8 emulator, written in C using VS2019. For fun, mostly.
  
- Currently doesn't really work, I'm still working on it...
+ Games run, but the implementation is still missing sound and input.
  
  Compilation:
  
