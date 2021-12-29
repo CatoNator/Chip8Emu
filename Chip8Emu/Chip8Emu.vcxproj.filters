@@ -15,8 +15,34 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Chip8Emu.cpp">
+    <ClCompile Include="Main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CPU.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RAM.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Display.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Backend.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CPU.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RAM.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Display.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Backend.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
