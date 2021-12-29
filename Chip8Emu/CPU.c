@@ -405,29 +405,25 @@ void ExecuteOpcode()
 		break;
 	}
 
-	printf("OP %x VX %u VY %u N %u VAL %u ADDR %u\n", OpCode, VX, VY, N, VAL, ADDR);
-
-
+	//printf("OP %x VX %u VY %u N %u VAL %u ADDR %u\n", OpCode, VX, VY, N, VAL, ADDR);
 }
 
 static void DumpRegisters()
 {
-	printf("------------------------------------------------------------------\n");
-	printf("\n");
+	printf("\n---- BEGIN REGISTER DUMP ----\n\n");
 
-	printf("V0: 0x%02x  V4: 0x%02x  V8: 0x%02x  VC: 0x%02x\n",
-		Registers[0], Registers[4], Registers[8], Registers[12]);
-	printf("V1: 0x%02x  V5: 0x%02x  V9: 0x%02x  VD: 0x%02x\n",
-		Registers[1], Registers[5], Registers[9], Registers[13]);
-	printf("V2: 0x%02x  V6: 0x%02x  VA: 0x%02x  VE: 0x%02x\n",
-		Registers[2], Registers[6], Registers[10], Registers[14]);
-	printf("V3: 0x%02x  V7: 0x%02x  VB: 0x%02x  VF: 0x%02x\n",
-		Registers[3], Registers[7], Registers[11], Registers[15]);
+	printf("REG 0 %u | REG 1 %u | REG 2 %u | REG 3 %u\n\
+REG 4 %u | REG 5 %u | REG 6 %u | REG 7 %u\n\
+REG 8 %u | REG 9 %u | REG A %u | REG B %u\n\
+REG C %u | REG D %u | REG E %u | REG F %u\n",
+		Registers[0x0], Registers[0x1], Registers[0x2], Registers[0x3],
+		Registers[0x4], Registers[0x5], Registers[0x6], Registers[0x7],
+		Registers[0x8], Registers[0x9], Registers[0xA], Registers[0xB],
+		Registers[0xC], Registers[0xD], Registers[0xE], Registers[0xF]);
 
-	printf("\n");
-	printf("PC: 0x%04x\n", ProgramCounter);
-	printf("\n");
-	printf("\n");
+	printf("\n I %u\nDT %u\nST %u\n\nProgramCounter %u\nStackPointer %u\n", IndexRegister, DelayRegister, SoundTimerRegister, ProgramCounter, StackPointer);
+
+	printf("\n\n---- END REGISTER DUMP ----\n");
 }
 
 void OP_NOP(uint16_t OpCode)
