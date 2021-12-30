@@ -312,15 +312,21 @@ void BackendFinalDraw()
 		printf("Unable to lock texture! %s\n", SDL_GetError());
 		return;
 	}
+
+	uint64_t Mask;
 	
 	for (int v = 0; v < RES_V; v++)
 	{
+		Mask = ZERO_PIX;
+		
 		for (int h = 0; h < RES_H; h++)
 		{
-			if (DisplayBuffer[v] & (ZERO_PIX >> h))
+			if (DisplayBuffer[v] & Mask)
 				TextureBuffer[v * RES_H + h] = SDL_MapRGBA(format, 0xFF, 0xFF, 0xFF, 0xFF);
 			else
 				TextureBuffer[v * RES_H + h] = SDL_MapRGBA(format, 0x00, 0x00, 0x00, 0xFF);
+
+			Mask >>= 1;
 		}
 	}
 

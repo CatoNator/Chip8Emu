@@ -195,10 +195,9 @@ void ExecuteOpcode()
 			uint16_t Val = Registers[VX] + Registers[VY];
 
 			//carry bit
-			if (Val > 0xFF)
-				Registers[0xF] = 1;
+			Registers[0xF] = (Val > 0xFF) ? 1 : 0;
 
-			Registers[VX] = (uint8_t)Val;
+			Registers[VX] = (uint8_t)(Val & 0xFF);
 
 			break;
 		}
@@ -207,8 +206,7 @@ void ExecuteOpcode()
 			//SUB Vx, Vy
 
 			//weird bit thingy
-			if (Registers[VX] > Registers[VY])
-				Registers[0xF] = 1;
+			Registers[0xF] = (Registers[VX] > Registers[VY]) ? 1 : 0;
 
 			Registers[VX] -= Registers[VY];
 
@@ -219,8 +217,7 @@ void ExecuteOpcode()
 			//SHR Vx
 
 			//LSB storage
-			if (Registers[VX] & 0x01)
-				Registers[0xF] = 1;
+			Registers[0xF] = (Registers[VX] & 0x01) ? 1 : 0;
 
 			Registers[VX] >>= 1;
 
@@ -231,10 +228,9 @@ void ExecuteOpcode()
 			//SUBN Vx, Vy
 
 			//weird bit thingy - inverse of 0x8xy5
-			if (Registers[VY] > Registers[VX])
-				Registers[0xF] = 1;
+			Registers[0xF] = (Registers[VY] > Registers[VX]) ? 1 : 0;
 
-			Registers[VX] -= Registers[VY];
+			Registers[VX] = Registers[VY] - Registers[VX];
 
 			break;
 		}
@@ -243,8 +239,7 @@ void ExecuteOpcode()
 			//SHL Vx
 
 			//MSB storage
-			if (Registers[VX] & 0x80)
-				Registers[0xF] = 1;
+			Registers[0xF] = (Registers[VX] & 0x80) ? 1 : 0;
 
 			Registers[VX] <<= 1;
 
@@ -386,7 +381,7 @@ void ExecuteOpcode()
 			//to do
 
 			//Take address from i, write decimal representation of Vx in I, I+1, I+2
-			Heap[IndexRegister] = (Registers[VX] % 1000) / 100;
+			Heap[IndexRegister]     = (Registers[VX] % 1000) / 100;
 			Heap[IndexRegister + 1] = (Registers[VX] % 100) / 10;
 			Heap[IndexRegister + 2] = (Registers[VX] % 10);
 
@@ -422,8 +417,9 @@ void ExecuteOpcode()
 		OP_NOP(OpCode);
 		break;
 	}
-
-	//printf("OP %x VX %u VY %u N %u VAL %u ADDR %u\n", OpCode, VX, VY, N, VAL, ADDR);
+#ifdef _DEBUG
+	printf("OP %x VX %u VY %u N %u VAL %u ADDR %u\n", OpCode, VX, VY, N, VAL, ADDR);
+#endif
 }
 
 static void DumpRegisters()
