@@ -173,7 +173,9 @@ uint8_t BackendLoadROM(const char* Path)
 	//Get filesize
 	uint32_t FileSize = ftell(RomFile);
 
+#if _DEBUG
 	printf("Filesize %u\n", FileSize);
+#endif
 
 	//Seek to BOF
 	fseek(RomFile, 0L, SEEK_SET);

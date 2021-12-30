@@ -15,7 +15,7 @@ uint8_t WaitingForInput = 0xFF;
 
 void CPUInit()
 {
-	memset(&Registers, 0, 2 * STACK_SIZE);
+	memset(&Registers, 0, STACK_SIZE);
 
 	ProgramCounter = PROGRAM_START;
 
