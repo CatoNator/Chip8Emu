@@ -44,7 +44,7 @@ uint8_t Rand()
 
 	uint8_t S1 = (S0 >> 1) ^ 0xF8;
 
-	if (S0 & 0x1 == 1)
+	if ((S0 & 0x1) == 1)
 		RandVal = 0x37 ^ S1;
 	else
 		RandVal = 0x23 ^ S1;
@@ -278,7 +278,6 @@ void ExecuteOpcode()
 		case (0x9E):
 		{
 			//SKP Vx
-			//to do
 
 			if (IsButtonDown(Registers[VX]))
 				ProgramCounter += 2;
@@ -288,7 +287,6 @@ void ExecuteOpcode()
 		case (0xA1):
 		{
 			//SKNP Vx
-			//to do
 			if (!IsButtonDown(Registers[VX]))
 				ProgramCounter += 2;
 
@@ -315,9 +313,24 @@ void ExecuteOpcode()
 		case (0x0A):
 		{
 			//LD Vx, K
-			//to do
-			Registers[VX] = 0;
+			//wait until a button is pressed; save into VX
+			while (InputBuffer == 0)
+			{
+				BackendPollInput();
+			}
 
+			uint8_t Val = 0;
+
+			for (uint8_t i = 0; i < 16; i++)
+			{
+				if ((1 << i) & InputBuffer)
+				{
+					Val = i;
+					break;
+				}
+			}
+
+			Registers[VX] = Val;
 			break;
 		}
 		case (0x15):
@@ -368,11 +381,6 @@ void ExecuteOpcode()
 		case (0x55):
 		{
 			//LD [I], Vx
-			
-			/*for (int i = 0; i <= VX; i++)
-			{
-				Heap[IndexRegister + i] = Registers[i];
-			}*/
 
 			memcpy(&Heap[IndexRegister], &Registers, VX);
 
@@ -383,10 +391,6 @@ void ExecuteOpcode()
 			//LD Vx, [I]
 
 			//Set registers V0-Vx to values from location I
-			/*for (int i = 0; i <= VX; i++)
-			{
-				Registers[i] = Heap[IndexRegister + i];
-			}*/
 
 			memcpy(&Registers, &Heap[IndexRegister], VX);
 

@@ -154,6 +154,7 @@
     <ClCompile Include="Input.c" />
     <ClCompile Include="Main.c" />
     <ClCompile Include="RAM.c" />
+    <ClCompile Include="Sound.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Backend.h" />
@@ -161,6 +162,7 @@
     <ClInclude Include="Display.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="RAM.h" />
+    <ClInclude Include="Sound.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

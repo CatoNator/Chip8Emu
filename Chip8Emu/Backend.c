@@ -24,7 +24,74 @@ int gBackBufferHeight = 128;
 
 // ---- INPUT DEFS AND VARS ---- //
 
+static const SDL_KeyCode KeyDefs[16] =
+{
+	SDLK_1,
+	SDLK_2,
+	SDLK_3,
+	SDLK_4,
+	SDLK_q,
+	SDLK_w,
+	SDLK_e,
+	SDLK_r,
+	SDLK_a,
+	SDLK_s,
+	SDLK_d,
+	SDLK_f,
+	SDLK_z,
+	SDLK_x,
+	SDLK_c,
+	SDLK_v
+};
+
 // ---- SOUND DEFS AND VARS ---- //
+
+#define AUDIO_FORMAT    (AUDIO_S16SYS) //signed 16-bit samples
+#define AUDIO_SAMPLES   (0x800)
+
+uint8_t AudioEnabled = 1;
+
+SDL_AudioDeviceID AudioDevice;
+SDL_AudioSpec AudioDeviceFormat;
+
+// ---- NON-BACKEND.H MANDATED IMPLEMENTATIONS
+
+void ProcessAudioCallback(void* userdata, uint8_t* stream, int len)
+{
+	if (!AudioEnabled)
+		return;
+
+	//turn buffer size into a sample count
+	len /= sizeof(int16_t);
+
+	//Process buffer using gSoundSystem
+	FillSoundBufferMono((int16_t*)stream, (uint32_t)len);
+}
+
+void SDLInitSound()
+{
+	SDL_AudioSpec Target;
+	Target.freq = SAMPLE_RATE;
+	Target.format = AUDIO_FORMAT;
+	Target.channels = AUDIO_CHANNELS;
+	Target.samples = AUDIO_SAMPLES;
+	Target.callback = ProcessAudioCallback;
+	Target.userdata = NULL;
+
+	AudioDevice = SDL_OpenAudioDevice(NULL, 0, &Target, &AudioDeviceFormat, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE);
+
+	if (AudioDevice < 0)
+	{
+		printf("Error initiating audio device!\nError %s\n", SDL_GetError());
+		AudioEnabled = 0;
+		return;
+	}
+
+	AudioEnabled = 1;
+
+	//Let the audio device play
+	SDL_PauseAudioDevice(AudioDevice, 0);
+}
 
 // ---- BACKEND.H MANDATED IMPLEMENTATIONS ---- //
 
@@ -32,9 +99,6 @@ uint8_t Running = 0;
 
 void BackendInit()
 {
-	//configure DPI stuff
-	//SetDPIAware();
-
 	//SDL_Initialization
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK) < 0)
 	{
@@ -68,6 +132,9 @@ void BackendInit()
 		printf("Failed creating backbuffer texture! Error %s\n", SDL_GetError());
 		return;
 	}
+
+	//Init audio device
+	SDLInitSound();
 
 	//Renderer default colour(black)
 	SDL_SetRenderDrawColor(gGameRenderer, 0x00, 0x00, 0x00, 0xFF);
@@ -135,13 +202,25 @@ void BackendPollInput()
 		//idk what to do with inputs yet here
 		else if (e.type == SDL_KEYDOWN)
 		{
-			//Temp keyboard polling
-			if (e.key.keysym.sym == SDLK_SPACE)
-				FrameAdv = 1;
+			for (int i = 0; i < 16; i++)
+			{
+				if (e.key.keysym.sym == KeyDefs[i])
+				{
+					InputBuffer |= (1 << i);
+					break;
+				}
+			}
 		}
 		else if (e.type == SDL_KEYUP)
 		{
-				
+			for (int i = 0; i < 16; i++)
+			{
+				if (e.key.keysym.sym == KeyDefs[i])
+				{
+					InputBuffer &= ~(1 << i);
+					break;
+				}
+			}
 		}
 	}
 }
@@ -161,12 +240,6 @@ void BackendRun()
 
 		//emulate CPU cycle
 		ExecuteOpcode();
-
-		/*ClearScreen();
-
-		DrawSprite(0, 0, &Heap[5 * 0xE], 5);
-
-		DrawPixel(33, 16);*/
 
 		//Draw buffer to screen
 		BackendFinalDraw();
@@ -189,8 +262,8 @@ void BackendPanic(const char* Message)
 	printf("Panic! %s\n", Message);
 
 	Running = 0;
-#ifdef _DEBUG
 
+#ifdef _DEBUG
 	printf("---- BEGIN HEAP DUMP ----\n");
 
 	//Dump heap

@@ -7,6 +7,8 @@
 #include "CPU.h"
 #include "Display.h"
 #include "RAM.h"
+#include "Input.h"
+#include "Sound.h"
 
 extern uint8_t Running;
 
