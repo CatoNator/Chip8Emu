@@ -233,8 +233,6 @@ void BackendRun()
 
 	while (Running)
 	{
-		
-		
 		//Poll input
 		BackendPollInput();
 
@@ -242,6 +240,7 @@ void BackendRun()
 		ExecuteOpcode();
 
 		//Draw buffer to screen
+		//This isn't ideal; restricting this to 60fps would be better
 		BackendFinalDraw();
 
 		//DT and ST ticks at 60Hz

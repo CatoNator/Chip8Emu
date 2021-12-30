@@ -11,6 +11,8 @@ uint8_t SoundTimerRegister = 0;
 
 uint16_t IndexRegister = 0;
 
+uint8_t WaitingForInput = 0xFF;
+
 void CPUInit()
 {
 	memset(&Registers, 0, 2 * STACK_SIZE);
@@ -54,6 +56,30 @@ uint8_t Rand()
 
 void ExecuteOpcode()
 {
+	if (WaitingForInput != 0xFF)
+	{
+		if (InputBuffer != 0)
+		{
+			//Found input; scan buffer for what key it is
+
+			uint8_t Val = 0;
+
+			for (uint8_t i = 0; i < 16; i++)
+			{
+				if ((1 << i) & InputBuffer)
+				{
+					Val = i;
+					break;
+				}
+			}
+
+			Registers[WaitingForInput] = Val;
+			WaitingForInput = 0xFF;
+		}
+		
+		return;
+	}
+	
 	uint16_t OpCode = ReadShort(ProgramCounter);
 	ProgramCounter += 2;
 
@@ -314,23 +340,11 @@ void ExecuteOpcode()
 		{
 			//LD Vx, K
 			//wait until a button is pressed; save into VX
-			while (InputBuffer == 0)
-			{
-				BackendPollInput();
-			}
 
-			uint8_t Val = 0;
+			//Store register value in WaitForInput
+			WaitingForInput = VX;
+			return;
 
-			for (uint8_t i = 0; i < 16; i++)
-			{
-				if ((1 << i) & InputBuffer)
-				{
-					Val = i;
-					break;
-				}
-			}
-
-			Registers[VX] = Val;
 			break;
 		}
 		case (0x15):
