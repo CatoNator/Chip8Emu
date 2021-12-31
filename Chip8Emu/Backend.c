@@ -142,9 +142,6 @@ void BackendInit()
 	//Configure emulator
 	InitRAM();
 
-	//Init screen
-	ClearScreen();
-
 	//Set CPU to initial state
 	CPUInit();
 
@@ -233,6 +230,10 @@ void BackendRun()
 	uint32_t PrevTicks = Ticks;
 	uint32_t TickDelta = 0;
 
+	//Initial draw to display
+	ClearScreen();
+	BackendFinalDraw();
+
 	while (Running)
 	{
 		//Poll input
@@ -286,6 +287,10 @@ void BackendPanic(const char* Message)
 
 void BackendFinalDraw()
 {
+	//Don't waste time rendering the same thing again
+	if (!DisplayRefreshNeeded)
+		return;
+	
 	//Rendering CHIP-8 buffer to SDL texture
 	uint32_t* TextureBuffer;
 	uint32_t TextureFormat;
@@ -348,6 +353,8 @@ void BackendFinalDraw()
 	}
 
 	SDL_RenderPresent(gGameRenderer);
+
+	DisplayRefreshNeeded = 0;
 }
 
 void BackendExit()

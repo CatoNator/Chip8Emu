@@ -56,24 +56,21 @@ uint8_t Rand()
 
 void ExecuteOpcode()
 {
+	//if opcode Fx0A has been tripped, we execute this instead of a normal opcode
 	if (WaitingForInput != 0xFF)
 	{
 		if (InputBuffer != 0)
 		{
 			//Found input; scan buffer for what key it is
-
-			uint8_t Val = 0;
-
 			for (uint8_t i = 0; i < 16; i++)
 			{
 				if ((1 << i) & InputBuffer)
 				{
-					Val = i;
+					Registers[WaitingForInput] = i;
 					break;
 				}
 			}
 
-			Registers[WaitingForInput] = Val;
 			WaitingForInput = 0xFF;
 		}
 		
@@ -192,12 +189,11 @@ void ExecuteOpcode()
 		case (4):
 		{
 			//ADD Vx, Vy
-			uint16_t Val = Registers[VX] + Registers[VY];
 
 			//carry bit
-			Registers[0xF] = (Val > 0xFF) ? 1 : 0;
+			Registers[0xF] = (Registers[VX] + Registers[VY] > 0xFF) ? 1 : 0;
 
-			Registers[VX] = (uint8_t)(Val & 0xFF);
+			Registers[VX] += Registers[VY];
 
 			break;
 		}
@@ -288,7 +284,7 @@ void ExecuteOpcode()
 	{
 		//DRW Vx, Vy, n
 
-		DrawSprite(Registers[VX], Registers[VY], (uint8_t*)(Heap + IndexRegister), N);
+		DrawSprite(Registers[VX], Registers[VY], (uint8_t*)(&Heap[IndexRegister]), N);
 
 		break;
 	}
@@ -337,7 +333,7 @@ void ExecuteOpcode()
 			//wait until a button is pressed; save into VX
 
 			//Store register value in WaitForInput
-			WaitingForInput = VX;
+			WaitingForInput = Registers[VX];
 			return;
 
 			break;
@@ -362,6 +358,9 @@ void ExecuteOpcode()
 		{
 			//ADD I, vx
 
+			//This isn't in all specs. I dunno if it causes any issues.
+			//Registers[0xF] = (IndexRegister + Registers[VX] > 0x0FFF) ? 1 : 0;
+
 			IndexRegister += Registers[VX];
 
 			break;
@@ -371,7 +370,7 @@ void ExecuteOpcode()
 			//LD F, Vx
 			//Set IndexRegister to point to hexadecimal character of value in Vx
 
-			IndexRegister = FONT_CHAR_SIZE * (Registers[VX] & 0x0F);
+			IndexRegister = FONT_CHAR_SIZE * Registers[VX];
 
 			break;
 		}
@@ -391,7 +390,7 @@ void ExecuteOpcode()
 		{
 			//LD [I], Vx
 
-			memcpy(&Heap[IndexRegister], &Registers, VX);
+			memcpy(&Heap[IndexRegister], &Registers, VX + 1);
 
 			break;
 		}
@@ -401,7 +400,7 @@ void ExecuteOpcode()
 
 			//Set registers V0-Vx to values from location I
 
-			memcpy(&Registers, &Heap[IndexRegister], VX);
+			memcpy(&Registers, &Heap[IndexRegister], VX + 1);
 
 			break;
 		}

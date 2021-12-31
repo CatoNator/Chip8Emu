@@ -13,6 +13,8 @@
 
 uint64_t DisplayBuffer[RES_V];
 
+extern uint8_t DisplayRefreshNeeded;
+
 extern void ClearScreen();
 extern void DrawPixel(uint8_t X, uint8_t Y);
 extern void DrawSprite(uint8_t X, uint8_t Y, uint8_t* SprBuf, uint8_t Size);
